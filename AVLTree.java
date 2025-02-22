@@ -1,6 +1,6 @@
 
 /*
- * *** YOUR NAME GOES HERE / YOUR SECTION NUMBER ***
+Alexander Ross 001
  *
  * This java file is a Java object implementing simple AVL Tree.
  * You are to complete the deleteElement method.
@@ -342,28 +342,68 @@ class LUC_AVLTree {
      */
 
     private Node deleteElement(int value, Node node) {
+        if (node == null) {
+            return null; // Value not found, do nothing
+        }
 
-        /*
-         * ADD CODE HERE
-         * 
-         * NOTE, that you should use the existing coded private methods
-         * in this file, which include:
-         *      - minValueNode,
-         *      - getMaxHeight,
-         *      - getHeight,
-         *      - getBalanceFactor,
-         *      - LLRotation
-         *      - RRRotation,
-         *      - LRRotation,
-         *      - RLRotation.
-         *
-         * To understand what each of these methods do, see the method prologues and
-         * code for each. You can also look at the method InsertElement, as it has do
-         * do many of the same things as this method.
-         */
+        // Step 1: Perform standard BST deletion
+        if (value < node.value) {
+            node.leftChild = deleteElement(value, node.leftChild);
+        } else if (value > node.value) {
+            node.rightChild = deleteElement(value, node.rightChild);
+        } else {
+            // Node to be deleted found
+            if (node.leftChild == null || node.rightChild == null) {
+                // Case 1 & 2: Node with only one child or no child
+                Node temp = (node.leftChild != null) ? node.leftChild : node.rightChild;
+                if (temp == null) {
+                    // No child case
+                    node = null;
+                } else {
+                    // One child case
+                    node = temp;
+                }
+            } else {
+                // Case 3: Node with two children
+                Node temp = minValueNode(node.rightChild);
+                node.value = temp.value;
+                node.rightChild = deleteElement(temp.value, node.rightChild);
+            }
+        }
+
+        if (node == null) {
+            return null;
+        }
+
+        // Step 2: Update height
+        node.height = getMaxHeight(getHeight(node.leftChild), getHeight(node.rightChild)) + 1;
+
+        // Step 3: Get balance factor and balance tree if needed
+        int balance = getBalanceFactor(node);
+
+        // Left Heavy (Right Rotation needed)
+        if (balance > 1 && getBalanceFactor(node.leftChild) >= 0) {
+            return LLRotation(node);
+        }
+        // Left-Right Case (Left-Right Rotation needed)
+        if (balance > 1 && getBalanceFactor(node.leftChild) < 0) {
+            node.leftChild = RRRotation(node.leftChild);
+            return LLRotation(node);
+        }
+        // Right Heavy (Left Rotation needed)
+        if (balance < -1 && getBalanceFactor(node.rightChild) <= 0) {
+            return RRRotation(node);
+        }
+        // Right-Left Case (Right-Left Rotation needed)
+        if (balance < -1 && getBalanceFactor(node.rightChild) > 0) {
+            node.rightChild = LLRotation(node.rightChild);
+            return RRRotation(node);
+        }
 
         return node;
     }
+
+
 
 
     /**
